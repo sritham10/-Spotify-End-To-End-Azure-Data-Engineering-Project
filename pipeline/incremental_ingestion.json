@@ -8,6 +8,11 @@
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.loop_input",
+						"type": "Expression"
+					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "AzureSQLToLake",
@@ -38,7 +43,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "SELECT * FROM @{item().schema}@{item().table}\nWHERE @{item().cdc} > '@{if(empty(item().from_date),activity('Last_cdc').output.value[0].cdc,item().from_date)}'",
+										"value": "SELECT * FROM @{item().schema}.@{item().table}\nWHERE @{item().cdc} > '@{if(empty(item().from_date),activity('Last_cdc').output.value[0].cdc,item().from_date)}'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -256,7 +261,10 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"container": "bronze",
-													"folder": "cdc",
+													"folder": {
+														"value": "@{item().table}_cdc",
+														"type": "Expression"
+													},
 													"file": "empty.json"
 												}
 											}
@@ -324,14 +332,14 @@
 					},
 					{
 						"schema": "dbo",
-						"table": "Dimtrack",
+						"table": "DimTrack",
 						"cdc": "updated_at",
 						"from_date": ""
 					},
 					{
 						"schema": "dbo",
 						"table": "DimDate",
-						"cdc": "updated_at",
+						"cdc": "date",
 						"from_date": ""
 					},
 					{
@@ -343,7 +351,7 @@
 					{
 						"schema": "dbo",
 						"table": "factStream",
-						"cdc": "updated_at",
+						"cdc": "stream_timestamp",
 						"from_date": ""
 					}
 				]
